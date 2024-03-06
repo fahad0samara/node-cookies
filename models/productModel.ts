@@ -1,7 +1,15 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema, Document } from "mongoose";
 
 // Define the product schema
-const productSchema = new mongoose.Schema({
+interface IProduct extends Document {
+  name: string;
+  image: string;
+  description: string;
+  price: string;
+  rating: string;
+}
+
+const productSchema: Schema<IProduct> = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -25,6 +33,6 @@ const productSchema = new mongoose.Schema({
 });
 
 // Create the Product model
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.model<IProduct>("Product", productSchema);
 
-module.exports = Product;
+export default Product;
