@@ -91,14 +91,6 @@ router.post("/", upload.single("file"), async (req, res) => {
     const product = new Product({ name, description, price, rating, image });
     await product.save();
 
-
-  
-        
-
-
-
-
-
     // Return the created product in the response
     res.status(201).json(product);
   } catch (error) {

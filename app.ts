@@ -3,6 +3,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 import mongoose from "mongoose";
+import productRoutes from './routes/productRoutes';
+
 
 import productRouter from "./routes/product";
 // MongoDB connection string with useNewUrlParser option included
@@ -39,7 +41,7 @@ app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);
 });
 
-app.use("/products", productRouter);
+app.use('/products', productRoutes);
 
 
 // Export Express app
