@@ -16,7 +16,28 @@ cloudinary.config({
 
 // Configure multer to handle file uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
+
+
+const handleCloudinaryUpload = async (
+  uploadOptions: any,
+  fileBuffer: Buffer,
+  res: Response
+): Promise<string | null> => {
+  return new Promise((resolve) => {
+    cloudinary.uploader.upload_stream(uploadOptions, (error: any, result: any) => {
+      if (error) {
+        console.error('Error uploading image to Cloudinary:', error);
+        res.status(500).json({ error: 'Internal server error' });
+        resolve(null);
+      } else {
+        resolve(result.secure_url);
+      }
+    }).end(fileBuffer);
+  });
+};
+
+
 
 
 // GET all products
@@ -41,27 +62,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-/////////////////////////
-// Uploads an image file
-/////////////////////////
-const uploadImage = async (imagePath: string) => {
-  // Use the uploaded file's name as the asset's public ID and
-  // allow overwriting the asset with new versions
-  const options = {
-    use_filename: true,
-    unique_filename: false,
-    overwrite: true,
-  };
 
-  try {
-    // Upload the image
-    const result = await cloudinary.uploader.upload(imagePath, options);
-    console.log(result);
-    return result.public_id;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 // POST a new product
 
@@ -72,27 +73,31 @@ router.post("/", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // Upload the image to Cloudinary
-    const result = await uploadImage(req.file.path);
+    if (req.file) {
+      const uploadOptions = {
+        folder: 'products/cookies-images',
+        public_id: `coffee-${Date.now()}`,
+        overwrite: true,
+      };
 
-    if (!result) {
-      return res.status(500).json({ error: "Failed to upload image" });
+      const result = await handleCloudinaryUpload(uploadOptions, req.file.buffer, res);
+      if (!result) {
+        return;
     }
-
-    // Extract product data from request body
-    const { name, description, price, rating } = req.body;
-
-    // Create a new Product document with image URL from Cloudinary
-    const product = new Product({
-      name,
-      description,
-      price,
-      rating,
-      image: result,
-    });
-
-    // Save the product to the database
+    console.log(result);
+    req.body.image = result;
+    }
+    const { name, description, price, rating, image } = req.body;
+    const product = new Product({ name, description, price, rating, image });
     await product.save();
+
+
+  
+        
+
+
+
+
 
     // Return the created product in the response
     res.status(201).json(product);
