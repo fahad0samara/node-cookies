@@ -12,15 +12,13 @@ const MONGODB_URI: string = process.env.MONGODB_URI ?? '';
 
 if (!MONGODB_URI) {
   console.error('MongoDB URI is not defined');
-  process.exit(1); // Exit the process or handle the error appropriately
+  process.exit(1);
 }
+console.log('MongoDB URI:', MONGODB_URI);
 
 mongoose
-  .connect(MONGODB_URI, {
-    //@ts-ignore
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(MONGODB_URI, 
+)
   .then(() => {
     console.log('Connected to MongoDB');
   })
