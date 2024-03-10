@@ -5,7 +5,6 @@ const morgan = require("morgan");
 import mongoose from "mongoose";
 import productRoutes from './routes/productRoutes';
 
-
 import productRouter from "./routes/product";
 // MongoDB connection string with useNewUrlParser option included
 require('dotenv').config();

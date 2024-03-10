@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import Product from "../models/productModel";
-import {
-  commonUploadOptions,
-  handleCloudinaryUpload,
-} from "./cloudinaryController";
+import { commonUploadOptions, handleCloudinaryUpload } from "./cloudinaryController";
 
 // GET paginated products
 export const getAllProducts = async (req: Request, res: Response) => {
@@ -26,10 +23,11 @@ export const getAllProducts = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       error,
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
+
 
 // GET a single product by ID
 export const getProductById = async (req: Request, res: Response) => {
@@ -56,28 +54,19 @@ export const createProduct = async (req: Request, res: Response) => {
     }
 
     // Upload the image to Cloudinary
-    const result = await handleCloudinaryUpload(
-      commonUploadOptions,
-      req.file.buffer,
-      res
-    );
+    const result = await handleCloudinaryUpload(commonUploadOptions, req.file.buffer, res);
     if (!result) {
       return;
     }
 
     // Extract product data from request body
-    const {
-      name,
-      description,
-      price,
-      originalPrice,
-      discountPercentage,
-      flavor,
-      isNewProduct,
-    } = req.body;
+    const { name, description, price, originalPrice, discountPercentage, flavor, isNewProduct } = req.body;
 
     // Identify the user based on IP address
-    const userIP = req.ip;
+  const userIP = req.ip;
+
+
+
 
     // Create a new Product document with image URL from Cloudinary and user IP address
     const product = new Product({
@@ -110,45 +99,41 @@ export const createProduct = async (req: Request, res: Response) => {
 export const getProductsByUser = async (req: Request, res: Response) => {
   try {
     const userIP = req.ip;
-    console.log("User IP:", userIP);
+    console.log('User IP:', userIP)
 
     // Find products associated with the user's IP address
     const products = await Product.find({ userIP });
 
     res.status(200).json(products);
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error('Error fetching products:', error);
     res.status(500).json({
       error,
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
 
+
+
+
+
 // PUT update a product by ID
 export const updateProductById = async (req: Request, res: Response) => {
   try {
-    const {
-      name,
-      description,
-      price,
-      originalPrice,
-      discountPercentage,
-      isNewProduct,
-      flavor,
-    } = req.body;
+    const { name, description, price, originalPrice, discountPercentage, isNewProduct, flavor } = req.body;
     let updatedProduct: any;
 
     if (req.file) {
       // If a new image is provided, upload the image to Cloudinary
-      const imageUri = await handleCloudinaryUpload(
-        commonUploadOptions,
-        req.file.buffer,
-        res
-      );
+      const imageUri = await handleCloudinaryUpload(commonUploadOptions, req.file.buffer, res);
       if (!imageUri) {
         return;
-      }
+      
+
+      };
+
+
 
       // If image upload is successful, update the product with the new image URL
       updatedProduct = await Product.findByIdAndUpdate(
@@ -183,15 +168,15 @@ export const updateProductById = async (req: Request, res: Response) => {
     }
 
     if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: 'Product not found' });
     }
 
     res.json(updatedProduct);
   } catch (error) {
-    console.error("Error updating product:", error);
+    console.error('Error updating product:', error);
     res.status(500).json({
       error,
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
@@ -214,3 +199,4 @@ export const deleteProductById = async (req: Request, res: Response) => {
 function generateUploadOptions(arg0: string) {
   throw new Error("Function not implemented.");
 }
+
