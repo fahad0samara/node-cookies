@@ -21,6 +21,8 @@ export const getAllProducts = async (req: Request, res: Response) => {
       currentPage: page,
     });
   } catch (error) {
+    console.error('Error fetching products:', error);
+
     res.status(500).json({
       error,
       message: 'Internal server error',
