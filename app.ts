@@ -53,6 +53,19 @@ app.get('/get-user-ip', (req: { ip: any; }, res: { json: (arg0: { userIP: any; }
 
 app.use('/products', productRoutes);
 
+// hello world route
+app.get("/", (req: any, res: { send: (arg0: string) => void; }) => {
+  res.send("Hello, world!");
+}
+);
+
+
+
+
+
+
+
+
 
 // Export Express app
 module.exports = app;
