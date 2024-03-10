@@ -1,16 +1,33 @@
-// productController.ts
-
 import { Request, Response } from "express";
 import Product from "../models/productModel";
-import { handleCloudinaryUpload } from "./cloudinaryController";
+import {
+  commonUploadOptions,
+  handleCloudinaryUpload,
+} from "./cloudinaryController";
 
-// GET all products
+// GET paginated products
 export const getAllProducts = async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
+
   try {
-    const products = await Product.find();
-    res.json(products);
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / pageSize);
+
+    const products = await Product.find()
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    res.json({
+      products,
+      totalPages,
+      currentPage: page,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -23,7 +40,10 @@ export const getProductById = async (req: Request, res: Response) => {
     }
     res.json(product);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -36,21 +56,40 @@ export const createProduct = async (req: Request, res: Response) => {
     }
 
     // Upload the image to Cloudinary
-    const result = await handleCloudinaryUpload(req.file.buffer, res);
+    const result = await handleCloudinaryUpload(
+      commonUploadOptions,
+      req.file.buffer,
+      res
+    );
     if (!result) {
       return;
     }
 
     // Extract product data from request body
-    const { name, description, price, rating } = req.body;
+    const {
+      name,
+      description,
+      price,
+      originalPrice,
+      discountPercentage,
+      flavor,
+      isNewProduct,
+    } = req.body;
 
-    // Create a new Product document with image URL from Cloudinary
+    // Identify the user based on IP address
+    const userIP = req.ip;
+
+    // Create a new Product document with image URL from Cloudinary and user IP address
     const product = new Product({
       name,
       description,
       price,
-      rating,
       image: result,
+      originalPrice,
+      discountPercentage,
+      flavor,
+      isNewProduct,
+      userIP,
     });
 
     // Save the product to the database
@@ -67,21 +106,93 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
+// GET products for a specific user
+export const getProductsByUser = async (req: Request, res: Response) => {
+  try {
+    const userIP = req.ip;
+    console.log("User IP:", userIP);
+
+    // Find products associated with the user's IP address
+    const products = await Product.find({ userIP });
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
+  }
+};
+
 // PUT update a product by ID
 export const updateProductById = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, rating, image } = req.body;
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      { name, description, price, rating, image },
-      { new: true }
-    );
+    const {
+      name,
+      description,
+      price,
+      originalPrice,
+      discountPercentage,
+      isNewProduct,
+      flavor,
+    } = req.body;
+    let updatedProduct: any;
+
+    if (req.file) {
+      // If a new image is provided, upload the image to Cloudinary
+      const imageUri = await handleCloudinaryUpload(
+        commonUploadOptions,
+        req.file.buffer,
+        res
+      );
+      if (!imageUri) {
+        return;
+      }
+
+      // If image upload is successful, update the product with the new image URL
+      updatedProduct = await Product.findByIdAndUpdate(
+        req.params.id,
+        {
+          name,
+          description,
+          price,
+          image: imageUri,
+          originalPrice,
+          discountPercentage,
+          flavor,
+          isNewProduct,
+        },
+        { new: true }
+      );
+    } else {
+      // If no new image is provided, update the product without changing the existing image
+      updatedProduct = await Product.findByIdAndUpdate(
+        req.params.id,
+        {
+          name,
+          description,
+          price,
+          originalPrice,
+          discountPercentage,
+          flavor,
+          isNewProduct,
+        },
+        { new: true }
+      );
+    }
+
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
     res.json(updatedProduct);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error updating product:", error);
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -94,7 +205,12 @@ export const deleteProductById = async (req: Request, res: Response) => {
     }
     res.json(deletedProduct);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
   }
 };
-
+function generateUploadOptions(arg0: string) {
+  throw new Error("Function not implemented.");
+}

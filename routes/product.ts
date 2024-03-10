@@ -41,7 +41,7 @@ const handleCloudinaryUpload = async (
 
 
 // GET all products
-router.get("/d", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const products = await Product.find();
     res.json(products);
@@ -117,7 +117,10 @@ router.put("/:id", async (req: Request, res: Response) => {
     }
     res.json(updatedProduct);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
   }
 });
 
@@ -130,7 +133,10 @@ router.delete("/:id", async (req: Request, res: Response) => {
     }
     res.json(deletedProduct);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      error,
+      message: "Internal server error",
+    });
   }
 });
 

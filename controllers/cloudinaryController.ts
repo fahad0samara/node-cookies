@@ -8,20 +8,27 @@ cloudinary.config({
   secure: true,
 });
 
+interface UploadOptions {
+  folder: string;
+  public_id: string;
+  overwrite?: boolean;
+}
+
+ export const commonUploadOptions: UploadOptions = {
+  folder: "products/cookies-images",
+  public_id: `coffee-${Date.now()}`,
+  overwrite: true,
+};
+
 export const handleCloudinaryUpload = async (
+  options: UploadOptions,
   fileBuffer: Buffer,
   res: Response
 ): Promise<string | null> => {
-  const uploadOptions = {
-    folder: "products/cookies-images",
-    public_id: `coffee-${Date.now()}`,
-    overwrite: true,
-  };
-
   try {
     const result: UploadApiResponse = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        uploadOptions,
+        options,
         (error: any, result: any) => {
           if (error) {
             console.error("Error uploading image to Cloudinary:", error);
