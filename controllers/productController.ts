@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Product from "../models/productModel";
 import { commonUploadOptions, handleCloudinaryUpload } from "./cloudinaryController";
-
 // GET paginated products
 export const getAllProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -23,12 +22,20 @@ export const getAllProducts = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching products:', error);
 
+    // Include error details in the response
     res.status(500).json({
-      error,
+      error: {
+        //@ts-ignore
+        message: error.message,
+        //@ts-ignore
+        stack: error.stack,
+        // Add more details as needed
+      },
       message: 'Internal server error',
     });
   }
 };
+
 
 
 // GET a single product by ID
