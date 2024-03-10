@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Product from "../models/productModel";
 import { commonUploadOptions, handleCloudinaryUpload } from "./cloudinaryController";
 // GET paginated products
+// GET paginated products
 export const getAllProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const pageSize = parseInt(req.query.pageSize as string) || 10;
@@ -14,8 +15,14 @@ export const getAllProducts = async (req: Request, res: Response) => {
       .skip((page - 1) * pageSize)
       .limit(pageSize);
 
+    // Remove userIP field from each product
+    const sanitizedProducts = products.map(product => {
+      const { userIP, ...sanitizedProduct } = product.toObject();
+      return sanitizedProduct;
+    });
+
     res.json({
-      products,
+      products: sanitizedProducts,
       totalPages,
       currentPage: page,
     });
@@ -24,17 +31,12 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
     // Include error details in the response
     res.status(500).json({
-      error: {
-        //@ts-ignore
-        message: error.message,
-        //@ts-ignore
-        stack: error.stack,
-        // Add more details as needed
-      },
+      error,
       message: 'Internal server error',
     });
   }
 };
+
 
 
 
