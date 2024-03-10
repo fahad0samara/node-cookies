@@ -8,18 +8,21 @@ import productRoutes from './routes/productRoutes';
 
 import productRouter from "./routes/product";
 // MongoDB connection string with useNewUrlParser option included
-const MONGODB_URI =
-  "mongodb+srv://fahad0nodejs:fahad@cluster0.d6hnl2v.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+require('dotenv').config();
+const MONGODB_URI: string = process.env.MONGODB_URI ?? '';
 
-// Connect to MongoDB
+if (!MONGODB_URI) {
+  console.error('MongoDB URI is not defined');
+  process.exit(1); // Exit the process or handle the error appropriately
+}
+
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, {   })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log('Connected to MongoDB');
   })
-  
   .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
+    console.error('Error connecting to MongoDB:', error);
   });
 
 
