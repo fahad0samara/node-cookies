@@ -10,9 +10,7 @@ interface IProduct extends Document {
   discountPercentage?: number;
   flavor?: string; 
   isNewProduct?: boolean;
-  userIP: string;
-  userAgent?: string;  
-  acceptLanguage?: string;
+
 }
 
 const productSchema: Schema<IProduct> = new mongoose.Schema(
@@ -45,16 +43,6 @@ const productSchema: Schema<IProduct> = new mongoose.Schema(
     isNewProduct: {
       type: Boolean,
       default: false,
-    },
-    userIP: {
-      type: String,
-      required: true,
-    },
-    userAgent: {
-      type: String,
-    },
-    acceptLanguage: {
-      type: String,
     },
   },
   {

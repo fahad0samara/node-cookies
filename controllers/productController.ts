@@ -15,14 +15,10 @@ export const getAllProducts = async (req: Request, res: Response) => {
       .skip((page - 1) * pageSize)
       .limit(pageSize);
 
-    // Remove userIP field from each product
-    const sanitizedProducts = products.map(product => {
-      const { userIP, ...sanitizedProduct } = product.toObject();
-      return sanitizedProduct;
-    });
+
 
     res.json({
-      products: sanitizedProducts,
+      products: products,
       totalPages,
       currentPage: page,
     });
@@ -73,8 +69,7 @@ export const createProduct = async (req: Request, res: Response) => {
     // Extract product data from request body
     const { name, description, price, originalPrice, discountPercentage, flavor, isNewProduct } = req.body;
 
-    // Identify the user based on IP address
-  const userIP = req.ip;
+
 
 
 
@@ -89,7 +84,7 @@ export const createProduct = async (req: Request, res: Response) => {
       discountPercentage,
       flavor,
       isNewProduct,
-      userIP,
+
     });
 
     // Save the product to the database
@@ -106,24 +101,7 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
-// GET products for a specific user
-export const getProductsByUser = async (req: Request, res: Response) => {
-  try {
-    const userIP = req.ip;
-    console.log('User IP:', userIP)
 
-    // Find products associated with the user's IP address
-    const products = await Product.find({ userIP });
-
-    res.status(200).json(products);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({
-      error,
-      message: 'Internal server error',
-    });
-  }
-};
 
 
 
